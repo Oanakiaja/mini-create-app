@@ -1,5 +1,11 @@
 const webpack = require('webpack');
 const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+  .BundleAnalyzerPlugin;
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const config = {
   entry: [
@@ -9,7 +15,7 @@ const config = {
   ],
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
+    filename: '[name].[contenthash].js',
   },
   module: {
     rules: [
@@ -17,6 +23,39 @@ const config = {
         test: /\.(js|jsx)$/,
         use: 'babel-loader',
         exclude: /node_modules/,
+      },
+      {
+        test: /\.less$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            // 将css样式文件用link标签引入，使用此loader就不需要用style-loader，即使用了也不会有效果
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 2,
+              modules: true,
+            },
+          },
+          'postcss-loader',
+          'less-loader',
+        ],
+      },
+      {
+        test: /\.svg$/,
+        use: 'file-loader',
+      },
+      {
+        test: /\.png$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              mimetype: 'image/png',
+            },
+          },
+        ],
       },
     ],
   },
@@ -30,6 +69,19 @@ const config = {
     contentBase: './dist',
     hot: true, // react-hot-loader
   },
+  plugins: [
+    new CleanWebpackPlugin(),
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static',
+      openAnalyzer: false,
+    }),
+    new HtmlWebpackPlugin({
+      title: 'HtmlWebpackPlugin Title',
+      template: './src/index.html',
+      filename: 'index.html',
+    }),
+    new MiniCssExtractPlugin(),
+  ],
 };
 
 module.exports = config;
