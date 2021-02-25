@@ -1,2 +1,2 @@
 # mini-create-app
-mini-webpack-config 
+It's a simple way to create a react-app by https://createapp.dev/
